@@ -215,6 +215,33 @@ You MUST follow the following format:
 </modify>
 ...
 
+</plan>
+
+You MUST follow the following format:
+
+# Contextual Request Analysis:
+<contextual_request_analysis>
+* Outline the ideal plan that solves the user request by referencing the snippets, and names of entities. and any other necessary files/directories.
+* Identify whether this is a large change that requires multiple <modify></modify> sections.
+* Describe each <create> and <modify> section in the following plan and why it will be needed.
+...
+</contextual_request_analysis>
+
+# Plan:
+<plan>
+<create file="file_path_1" relevant_files="space-separated list of ALL files relevant for creating file_path_1">
+* Exact instructions for creating the new file needed to solve the issue
+* Include references to all files, imports and entity names
+...
+</create>
+...
+
+<modify file="file_path_2" relevant_files="space-separated list of ALL files relevant for modifying file_path_2">
+* Exact instructions for the modifications needed to solve the issue. Be exact and mention references to all files, imports and entity names.
+...
+</modify>
+...
+
 </plan>"""
 
 sandbox_files_to_change_prompt = """\

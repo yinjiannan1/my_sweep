@@ -598,9 +598,10 @@ class ModifyBot:
             == 0
         ):
             raise UnneededEditError("No snippets edited")
-
+        replace_index = 0
         for match_ in re.finditer(updated_pattern, update_snippets_response, re.DOTALL):
             index = int(match_.group("index"))
+            replace_index = index
             original_code = match_.group("original_code").strip("\n")
             updated_code = match_.group("updated_code").strip("\n")
 
@@ -616,17 +617,23 @@ class ModifyBot:
                     replace=updated_code.splitlines(),
                 )[0]
             )
+        logger.info(f"updated_snippets is {updated_snippets} on OpenAI.")   
+        logger.info(f"replace_index is {replace_index} on OpenAI.")            
+         
 
         for match_ in re.finditer(append_pattern, update_snippets_response, re.DOTALL):
             index = int(match_.group("index"))
             updated_code = match_.group("updated_code").strip("\n")
+            logger.info(f"index is {index} on OpenAI.")  
+            logger.info(f"updated_code is {updated_code} on OpenAI.")  
+            logger.info(f"selected_snippets is {selected_snippets} on OpenAI.")  
 
-            _reason, current_contents = selected_snippets[index]
-            if index not in updated_snippets:
-                updated_snippets[index] = current_contents
+            _reason, current_contents = selected_snippets[index-replace_index-1]
+            if index-replace_index-1 not in updated_snippets:
+                updated_snippets[index-replace_index-1] = current_contents
             else:
-                current_contents = updated_snippets[index]
-            updated_snippets[index] = current_contents + "\n" + updated_code
+                current_contents = updated_snippets[index-replace_index-1]
+            updated_snippets[index-replace_index-1] = current_contents + "\n" + updated_code
 
         result = file_contents
         new_code = []

@@ -46,7 +46,7 @@ class RefactorBot(ChatGPT):
         self.model = (
             "gpt-4-32k-0613"
             if (self.chat_logger and self.chat_logger.is_paying_user())
-            else "gpt-3.5-turbo-16k-0613"
+            else "gpt-3.5-turbo"
         )
         self.messages = [
             Message(

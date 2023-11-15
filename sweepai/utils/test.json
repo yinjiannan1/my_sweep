@@ -1,0 +1,7 @@
+{'id': 'chatcmpl-38a65f3e-424a-49db-9f93-0aebf86ef001', 'object': 'chat.completion', 'created': 1699440080, 'model': './models/WizardLM-13B-V1.2/ggml-model-f16-Q5.gguf', 'choices': [
+        {'index': 0, 'message': {'role': 'assistant', 'content': '\n```\\n===============\\nPlease provide the code snippets and the instructions for each modification, and I will be glad to assist you in completing the task.\\n===============\\n\\n```'
+            }, 'finish_reason': 'stop'
+        }
+    ], 'usage': {'prompt_tokens': 3690, 'completion_tokens': 45, 'total_tokens': 3735
+    }
+}

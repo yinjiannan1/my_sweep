@@ -218,6 +218,9 @@ def prepare_index_from_snippets(snippets, len_repo_cache_dir=0):
     index = CustomIndex()
     try:
         for doc in tqdm(all_docs, total=len(all_docs)):
+            logger.info(
+            f"add document..."
+            )
             index.add_document(
                 title=f"{doc.title}:{doc.start}:{doc.end}", content=doc.content
             )

@@ -231,11 +231,11 @@ def on_ticket(
     if chat_logger:
         is_paying_user = chat_logger.is_paying_user()
         is_consumer_tier = chat_logger.is_consumer_tier()
-        use_faster_model = OPENAI_USE_3_5_MODEL_ONLY or chat_logger.use_faster_model(g)
+        use_faster_model = OPENAI_USE_3_5_MODEL_ONLY
     else:
         is_paying_user = True
         is_consumer_tier = False
-        use_faster_model = False
+        use_faster_model = True
 
     if fast_mode:
         use_faster_model = True
@@ -267,7 +267,7 @@ def on_ticket(
         "installation_id": installation_id,
         "function": "on_ticket",
         "edited": edited,
-        "model": "gpt-3.5" if use_faster_model else "gpt-4",
+        "model": "gpt-3.5",
         "tier": "pro" if is_paying_user else "free",
         "mode": ENV,
         "slow_mode": slow_mode,
@@ -282,6 +282,7 @@ def on_ticket(
     context.context(metadata=metadata)
     logger.bind(**metadata)
     logger.info(f"Metadata: {metadata}")
+    logger.info(f"use fast model {use_faster_model}")
 
     posthog.capture(username, "started", properties=metadata)
     markdown_badge = get_docker_badge()

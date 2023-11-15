@@ -91,7 +91,7 @@ class SweepConfig(BaseModel):
         "sweep.yaml",
     ]
     # Image formats
-    max_file_limit: int = 60_000
+    max_file_limit: int = 50
 
     def to_yaml(self) -> str:
         return yaml.safe_dump(self.dict())

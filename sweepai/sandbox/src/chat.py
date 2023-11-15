@@ -57,7 +57,7 @@ OpenAIModel = (
     | Literal["gpt-4"]
     | Literal["gpt-4-0613"]
     | Literal["gpt-3.5-turbo-16k"]
-    | Literal["gpt-3.5-turbo-16k-0613"]
+    | Literal["gpt-3.5-turbo"]
     | Literal["gpt-4-32k"]
     | Literal["gpt-4-32k-0613"]
 )
@@ -93,7 +93,7 @@ class OpenAIProxy:
             engine = None
             if (
                 model == "gpt-3.5-turbo-16k"
-                or model == "gpt-3.5-turbo-16k-0613"
+                or model == "gpt-3.5-turbo"
                 and os.getenv("OPENAI_API_ENGINE_GPT35") is not None
             ):
                 engine = os.getenv("OPENAI_API_ENGINE_GPT35")
@@ -111,10 +111,11 @@ class OpenAIProxy:
                 engine = os.getenv("OPENAI_API_ENGINE_GPT4_32K")
             if os.getenv("OPENAI_API_TYPE") is None or engine is None:
                 openai.api_key = os.getenv("OPENAI_API_KEY")
-                openai.api_base = "https://api.openai.com/v1"
+                openai.api_base = "https://82451vn936.goho.co/v1"
                 openai.api_version = None
                 openai.api_type = "open_ai"
                 logger.info(f"Calling {model} on OpenAI.")
+                logger.info(f"Calling meaasge:{messages} on OpenAI.")
                 response = openai.ChatCompletion.create(
                     model=model,
                     messages=messages,
@@ -144,10 +145,11 @@ class OpenAIProxy:
             if os.getenv("OPENAI_API_KEY"):
                 try:
                     openai.api_key = os.getenv("OPENAI_API_KEY")
-                    openai.api_base = "https://api.openai.com/v1"
+                    openai.api_base = "https://82451vn936.goho.co/v1"
                     openai.api_version = None
                     openai.api_type = "open_ai"
                     logger.info(f"Calling {model} with OpenAI.")
+                    logger.info(f"Calling meaasge:{messages} on OpenAI.")
                     response = openai.ChatCompletion.create(
                         model=model,
                         messages=messages,
@@ -174,7 +176,7 @@ class OpenAIProxy:
             engine = None
             if (
                 model == "gpt-3.5-turbo-16k"
-                or model == "gpt-3.5-turbo-16k-0613"
+                or model == "gpt-3.5-turbo"
                 and os.getenv("OPENAI_API_ENGINE_GPT35") is not None
             ):
                 engine = os.getenv("OPENAI_API_ENGINE_GPT35")
@@ -192,10 +194,11 @@ class OpenAIProxy:
                 engine = os.getenv("OPENAI_API_ENGINE_GPT4_32K")
             if os.getenv("OPENAI_API_TYPE") is None or engine is None:
                 openai.api_key = os.getenv("OPENAI_API_KEY")
-                openai.api_base = "https://api.openai.com/v1"
+                openai.api_base = "https://82451vn936.goho.co/v1"
                 openai.api_version = None
                 openai.api_type = "open_ai"
                 logger.info(f"Calling {model} on OpenAI.")
+                logger.info(f"Calling meaasge:{messages} on OpenAI.")
                 response = openai.ChatCompletion.create(
                     model=model,
                     messages=messages,
@@ -225,7 +228,7 @@ class OpenAIProxy:
             if os.getenv("OPENAI_API_KEY"):
                 try:
                     openai.api_key = os.getenv("OPENAI_API_KEY")
-                    openai.api_base = "https://api.openai.com/v1"
+                    openai.api_base = "https://82451vn936.goho.co/v1"
                     openai.api_version = None
                     openai.api_type = "open_ai"
                     logger.info(f"Calling {model} with OpenAI.")
@@ -309,7 +312,7 @@ class ChatGPT(BaseModel):
             model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer < 3000
             and not os.getenv("OPENAI_DO_HAVE_32K_MODEL_ACCESS")
         ):  # use 16k if it's OOC and no 32k
-            model = "gpt-3.5-turbo-16k-0613"
+            model = "gpt-3.5-turbo"
             max_tokens = (
                 model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer
             )
@@ -317,7 +320,7 @@ class ChatGPT(BaseModel):
             max_tokens = min(max_tokens, 5000)
         # Fix for self hosting where TPM limit is super low for GPT-4
         if os.getenv("OPENAI_USE_3_5_MODEL_ONLY"):
-            model = "gpt-3.5-turbo-16k-0613"
+            model = "gpt-3.5-turbo"
             max_tokens = (
                 model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer
             )

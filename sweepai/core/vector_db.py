@@ -7,6 +7,7 @@ from typing import Generator, List
 import numpy as np
 import replicate
 import requests
+import threading
 from deeplake.core.vectorstore.deeplake_vectorstore import (  # pylint: disable=import-error
     VectorStore,
 )
@@ -113,23 +114,42 @@ def embed_texts(texts: tuple[str]):
     )
     match VECTOR_EMBEDDING_SOURCE:
         case "sentence-transformers":
+            logger.info(
+            f"start to get model using {VECTOR_EMBEDDING_SOURCE}..."
+            )
             sentence_transformer_model = SentenceTransformer(
                 SENTENCE_TRANSFORMERS_MODEL, cache_folder=MODEL_DIR
             )
-            vector = sentence_transformer_model.encode(
-                texts, show_progress_bar=True, batch_size=BATCH_SIZE
+            logger.info(
+            f"end to get model using {VECTOR_EMBEDDING_SOURCE}..."
             )
+
+                        # 执行encode()方法，并使用tqdm显示进度条
+            vector = []
+            logger.info(
+            f"test log start {len(vector)} texts using {VECTOR_EMBEDDING_SOURCE}..."
+            )
+            for v in tqdm(sentence_transformer_model.encode(texts, batch_size=BATCH_SIZE, convert_to_tensor=True, device='cpu'), total=len(texts)):
+                vector.append(v)
+            logger.info(
+            f"test log end {len(vector)} texts using {VECTOR_EMBEDDING_SOURCE}..."
+            )
+            # 输出最终结果
+            print("encode()方法执行完毕。")
+
             return vector
         case "openai":
             import openai
+            EMBEDDING_API_URL = "http://8.130.161.29/v1/embeddings"
 
             embeddings = []
-            for batch in tqdm(chunk(texts, batch_size=BATCH_SIZE), disable=False):
+            for batch in tqdm(chunk(texts[:1], batch_size=1), disable=False):
                 try:
-                    response = openai.Embedding.create(
-                        input=batch, model="text-embedding-ada-002"
-                    )
-                    embeddings.extend([r["embedding"] for r in response["data"]])
+                    # 调用您自己的接口
+                    logger.info(f"batch is  {batch} end for batch ")
+                    response = requests.post(EMBEDDING_API_URL, json={"input": batch}).json()
+                    #logger.info(f"response is  {response} end for response")
+                    embeddings.extend(response)
                 except SystemExit:
                     raise SystemExit
                 except Exception:
@@ -184,7 +204,7 @@ def get_deeplake_vs_from_repo(
     logger.info(f"Found {len(snippets)} snippets in repository {repo_full_name}")
     # prepare lexical search
     index = prepare_index_from_snippets(
-        snippets, len_repo_cache_dir=len(cloned_repo.cache_dir) + 1
+        snippets[:1000], len_repo_cache_dir=len(cloned_repo.cache_dir) + 1
     )
     logger.print("Prepared index from snippets")
     # scoring for vector search
@@ -222,7 +242,7 @@ def get_deeplake_vs_from_repo(
     documents = []
     metadatas = []
     ids = []
-    for snippet in snippets:
+    for snippet in snippets[:1000]:
         documents.append(snippet.get_snippet(add_ellipsis=False, add_lines=False))
         metadata = {
             "file_path": snippet.file_path[len(cloned_repo.cache_dir) + 1 :],

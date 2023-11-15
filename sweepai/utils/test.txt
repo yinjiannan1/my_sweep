@@ -1,0 +1,308 @@
+ system
+  Content: You are a brilliant and meticulous engineer assigned to write code to complete the user's request. When you write code, the code works on the first try, and is complete. Take into account the current repository's language, code style, and dependencies.
+  
+  You will be given the old_file and relevant snippets to edit. Respond in the following format:
+  
+  <diffs>
+  ```
+  <<<<<<< REPLACE (index=i)
+  old line(s) from snippet i
+  =======
+  new line(s) to replace
+  >>>>>>>
+  
+  <<<<<<< APPEND (index=j)
+  new line(s) to append to snippet j
+  >>>>>>>
+  
+  ...
+  ```
+  </diffs>
+
+  Content: # Repo & Issue Metadata
+   Repo: AEPB-2022 - No description provided.
+   Issue Title: 帮我把SmartParkingBoy.java里面的findCorrectLot用stream实现
+   Issue Description: 
+
+Content: Relevant files in this PR:
+   
+   <relevant_file file_path="src/main/java/com/example/AEPB/entity/ParkingLot.java,">
+   File not found
+   </relevant_file>
+   <relevant_file file_path="src/main/java/com/example/AEPB/entity/ParkingLotStatus.java">
+   package com.example.AEPB.entity;
+   
+   
+   import lombok.NoArgsConstructor;
+   
+   @NoArgsConstructor
+   public class ParkingLotStatus {
+       private boolean success = false;
+   
+       private ParkingLot parkingLot;
+   
+       private Ticket ticket;
+   
+       public ParkingLot getParkingLot() {
+           return parkingLot;
+       }
+   
+       public void setParkingLot(ParkingLot parkingLot) {
+           this.parkingLot = parkingLot;
+       }
+   
+       public boolean isSuccess() {
+           return success;
+       }
+   
+       public void setSuccess(boolean success) {
+           this.success = success;
+       }
+   
+       public Ticket getTicket() {
+           return ticket;
+       }
+   
+       public void setTicket(Ticket ticket) {
+           this.ticket = ticket;
+       }
+   }
+   
+   </relevant_file>
+ 
+ Content: Relevant files in this PR:
+ 
+ <relevant_file file_path="src/main/java/com/example/AEPB/entity/ParkingLot.java,">
+ File not found
+ </relevant_file>
+ <relevant_file file_path="src/main/java/com/example/AEPB/entity/ParkingLotStatus.java">
+ package com.example.AEPB.entity;
+ 
+ 
+ import lombok.NoArgsConstructor;
+ 
+ @NoArgsConstructor
+ public class ParkingLotStatus {
+     private boolean success = false;
+ 
+     private ParkingLot parkingLot;
+ 
+     private Ticket ticket;
+ 
+     public ParkingLot getParkingLot() {
+         return parkingLot;
+     }
+ 
+     public void setParkingLot(ParkingLot parkingLot) {
+         this.parkingLot = parkingLot;
+     }
+ 
+     public boolean isSuccess() {
+         return success;
+     }
+ 
+     public void setSuccess(boolean success) {
+         this.success = success;
+     }
+ 
+     public Ticket getTicket() {
+         return ticket;
+     }
+ 
+     public void setTicket(Ticket ticket) {
+         this.ticket = ticket;
+     }
+ }
+ 
+ </relevant_file> on OpenAI.
+ 2023-11-08 08:34:02.388 | INFO     | sweepai.utils.openai_proxy:call_openai:68 - log message is Role: user
+ Content: # Code
+ File path: src/main/java/com/example/AEPB/service/SmartParkingBoy.java
+ <old_code>
+ ```
+ package com.example.AEPB.service;
+ 
+ import com.example.AEPB.entity.ParkingLot;
+ import com.example.AEPB.entity.ParkingLotStatus;
+ import com.example.AEPB.entity.Ticket;
+ import com.example.AEPB.entity.Vehicle;
+ 
+ import java.util.*;
+ 
+ public class SmartParkingBoy{
+ 
+     ParkingBoy parkingBoy = new ParkingBoy();
+ 
+     public ParkingLotStatus parkingVehicle(Vehicle vehicle) {
+ 
+         ParkingLotStatus parkingLotStatus = new ParkingLotStatus();
+         if(!parkingBoy.isExistEmptyLot()){
+             System.out.println("车库已满！");
+             parkingLotStatus.setSuccess(false);
+             return parkingLotStatus;
+         }
+         ParkingLot parkingLot = findCorrectLot();
+         List<Vehicle> vehicles = parkingLot.getVehicleList();
+         if(Objects.isNull(vehicle) || vehicle.getCarPlateNumber() == null){
+             parkingLotStatus.setSuccess(false);
+             System.out.println("车牌不能为空！");
+             return parkingLotStatus;
+         }
+         if(hasSameVehicle(vehicle)){
+             parkingLotStatus.setSuccess(false);
+             System.out.println("车牌重复！已报警");
+             return parkingLotStatus;
+         }
+         Ticket ticket = new Ticket(vehicle, true);
+         parkingBoy.ticketVehicleHashMap.put(ticket, vehicle);
+         vehicles.add(vehicle);
+         parkingLotStatus.setSuccess(true);
+         parkingLotStatus.setTicket(ticket);
+         parkingLotStatus.setParkingLot(parkingLot);
+         return parkingLotStatus;
+     }
+ 
+     public ParkingLotStatus pickingVehicle(Ticket ticket){
+        return parkingBoy.pickingVehicle(ticket);
+     }
+ 
+     public ParkingLot findCorrectLot() {
+         parkingBoy.parkingLotList.sort(Comparator.comparing(ParkingLot::getVehicleNumber));
+         for (ParkingLot lot : parkingBoy.parkingLotList) {
+             if (lot.getVehicleList().size() < lot.getSize()) {
+                 return lot;
+             }
+         }
+         return null;
+     }
+ 
+     public boolean hasSameVehicle(Vehicle vehicle) {
+         List<ParkingLot> parkingLotList = parkingBoy.getParkingLotList();
+         for (ParkingLot lot: parkingLotList) {
+             if(lot.hasSameVehicle(vehicle)){
+                 return true;
+             }
+         }
+         return false;
+     }
+ 
+     public Map<Ticket, Vehicle> getTicketVehicleHashMap() {
+         return parkingBoy.getTicketVehicleHashMap();
+     }
+ 
+     public List<ParkingLot> getParkingLotList() {
+         return parkingBoy.getParkingLotList();
+     }
+ 
+     public void setTicketVehicleHashMap(Map<Ticket, Vehicle> ticketVehicleHashMap) {
+         parkingBoy.setTicketVehicleHashMap(ticketVehicleHashMap);
+     }
+ }
+ 
+ ```
+ </old_code>
+ 
+ # Request
+ • Modify the `findCorrectLot` method in `SmartParkingBoy.java`:
+  + Replace the existing implementation with a stream-based one:
+  ```java
+         public ParkingLot findCorrectLot() {
+             parkingBoy.parkingLotList.stream().filter(lot -> lot.getVehicleList().size() < lot.getSize()).findFirst().orElse(null);
+         }
+   ```
+  + Import the necessary classes: `java.util.stream.Stream`, `java.util.Optional`
+ • Add a test case for the new implementation in `SmartParkingBoyTest.java`:
+  + Create a method that calls `findCorrectLot` and asserts that it returns a non-null lot:
+  ```java
+         @Test
+         public void testFindCorrectLot() {
+             // Arrange
+             SmartParkingBoy smartParkingBoy = new SmartParkingBoy();
+             ParkingLot parkingLot = new ParkingLot();
+             parkingLot.setSize(10);
+             parkingLot.setVehicleList(new ArrayList<>());
+             smartParkingBoy.parkingLotList.add(parkingLot);
+ 
+             // Act
+             ParkingLot correctLot = smartParkingBoy.findCorrectLot();
+ 
+             // Assert
+             assertNotNull(correctLot);
+         }
+   ```
+ • Update the JUnit test coverage in `SmartParkingBoyTest.java`:
+  + Add a new test case that calls `findCorrectLot` with an empty parking lot list and asserts that it returns null:
+  ```java
+         @Test
+         public void testFindCorrectLot_emptyList() {
+             // Arrange
+             SmartParkingBoy smartParkingBoy = new SmartParkingBoy();
+ 
+             // Act
+             ParkingLot correctLot = smartParkingBoy.findCorrectLot();
+ 
+             // Assert
+             assertNull(correctLot);
+         }
+   ```
+ 
+ <snippets_to_update>
+ <snippet index="0" reason="justification for modifying this snippet">
+ package com.example.AEPB.service;
+ 
+ import com.example.AEPB.entity.ParkingLot;
+ import com.example.AEPB.entity.ParkingLotStatus;
+ import com.example.AEPB.entity.Ticket;
+ import com.example.AEPB.entity.Vehicle;
+ 
+ import java.util.*;
+ 
+ public class SmartParkingBoy{
+ 
+     ParkingBoy parkingBoy = new ParkingBoy();
+ 
+     public ParkingLotStatus parkingVehicle(Vehicle vehicle) {
+ 
+         ParkingLotStatus parkingLotStatus = new ParkingLotStatus();
+         if(!parkingBoy.isExistEmptyLot()){
+             System.out.println("车库已满！");
+             parkingLotStatus.setSuccess(false);
+             return parkingLotStatus;
+         }
+         ParkingLot parkingLot = findCorrectLot();
+         List<Vehicle> vehicles = parkingLot.getVehicleList();
+         if(Objects.isNull(vehicle) || vehicle.getCarPlateNumber() == null){
+             parkingLotStatus.setSuccess(false);
+             System.out.println("车牌不能为空！");
+             return parkingLotStatus;
+         }
+         if(hasSameVehicle(vehicle)){
+             parkingLotStatus.setSuccess(false);
+             System.out.println("车牌重复！已报警");
+             return parkingLotStatus;
+         }
+         Ticket ticket = new Ticket(vehicle, true);
+         parkingBoy.ticketVehicleHashMap.put(ticket, vehicle);
+         vehicles.add(vehicle);
+         parkingLotStatus.setSuccess(true);
+         parkingLotStatus.setTicket(ticket);
+         parkingLotStatus.setParkingLot(parkingLot);
+         return parkingLotStatus;
+     }
+ 
+     public ParkingLotStatus pickingVehicle(Ticket ticket){
+        return parkingBoy.pickingVehicle(ticket);
+     }
+ 
+     public ParkingLot findCorrectLot() {
+         parkingBoy.parkingLotList.sort(Comparator.comparing(ParkingLot::getVehicleNumber));
+         for (ParkingLot lot : parkingBoy.parkingLotList) {
+             if (lot.getVehicleList().size() < lot.getSize()) {
+                 return lot;
+             }
+         }
+         return null;
+     }</snippet>
+ Identify all changes that need to be made to the file.
+ In a list, identify all code sections that should receive these changes and all locations code should be added. These snippets will go into the snippets_to_modify block. Pick many small snippets and locations to add code instead of a single large one.
+ Then identify any patterns of code that should be modified, like all fu

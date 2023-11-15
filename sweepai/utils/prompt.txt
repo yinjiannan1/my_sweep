@@ -1,0 +1,89 @@
+			'content': 'Here\'s the modified code with the requested changes:\r
+\r
+<relevant_file file_path="src/main/java/com/example/AEPB/service/SmartParkingBoy.java">\r
+```java\r
+package com.example.AEPB.service;\r
+import com.example.AEPB.entity.ParkingLot;\r
+import com.example.AEPB.entity.ParkingLotStatus;\r
+import com.example.AEPB.entity.Ticket;\r
+import com.example.AEPB.entity.Vehicle;\r
+import java.util.*;\r
+\r
+public class SmartParkingBoy {\r
+    ParkingBoy parkingBoy = new ParkingBoy();\r
+\r
+    public ParkingLotStatus parkingVehicle(Vehicle vehicle) throws Exception {\r
+        ParkingLotStatus parkingLotStatus = new ParkingLotStatus();\r
+        if (!parkingBoy.isExistEmptyLot()) {\r
+            System.out.println("车库已满！");\r
+            parkingLotStatus.setSuccess(false);\r
+            return parkingLotStatus;\r
+        }\r
+        ParkingLot parkingLot = findCorrectLot();\r
+        List<Vehicle> vehicles = parkingLot.getVehicleList();\r
+        if (Objects.isNull(vehicle) || vehicle.getCarPlateNumber() == null) {\r
+            parkingLotStatus.setSuccess(false);\r
+            System.out.println("车牌不能为空！");\r
+            return parkingLotStatus;\r
+        }\r
+        if (hasSameVehicle(vehicle)) {\r
+            parkingLotStatus.setSuccess(false);\r
+            System.out.println("车牌重复！已报警");\r
+            return parkingLotStatus;\r
+        }\r
+        Ticket ticket = new Ticket(vehicle, true);\r
+        parkingBoy.ticketVehicleHashMap.put(ticket, vehicle);\r
+        vehicles.add(vehicle);\r
+        parkingLotStatus.setSuccess(true);\r
+        parkingLotStatus.setTicket(ticket);\r
+        parkingLotStatus.setParkingLot(parkingLot);\r
+        return parkingLotStatus;\r
+    }\r
+\r
+    public ParkingLotStatus pickingVehicle(Ticket ticket) {\r
+        return parkingBoy.pickingVehicle(ticket);\r
+    }\r
+\r
+    public ParkingLot findCorrectLot() throws Exception {\r
+        List<ParkingLot> parkingLotList = new ArrayList<>();\r
+        for (ParkingLot lot : parkingBoy.parkingLotList) {\r
+            if (lot.getVehicleList().size() < lot.getSize()) {\r
+                return lot;\r
+            }\r
+            parkingLotList.add(lot);\r
+        }\r
+        Collections.sort(parkingLotList, Comparator.comparing(ParkingLot::getEmptyRatio));\r
+        return parkingLotList.stream().findFirst().orElse(null);\r
+    }\r
+\r
+    public boolean hasSameVehicle(Vehicle vehicle) {\r
+        List<ParkingLot> parkingLotList = parkingBoy.getParkingLotList();\r
+        for (ParkingLot lot : parkingLotList) {\r
+            if (lot.hasSameVehicle(vehicle)) {\r
+                return true;\r
+            }\r
+        }\r
+        return false;\r
+    }\r
+\r
+    public Map<Ticket, Vehicle> getTicketVehicleHashMap() {\r
+        return parkingBoy.getTicketVehicleHashMap();\r
+    }\r
+\r
+    public List<ParkingLot> getParkingLotList() {\r
+        return parkingBoy.getParkingLotList();\r
+    }\r
+\r
+    public void setTicketVehicleHashMap(Map<Ticket, Vehicle> ticketVehicleHashMap) {\r
+        parkingBoy.setTicketVehicleHashMap(ticketVehicleHashMap);\r
+    }\r
+}\r
+```\r
+</relevant_file>\r
+\r
+The modified code includes:\r
+* Imported `java.util.*` for `ArrayList`, `Collections`, and `Comparator`.\r
+* Added `throws Exception` to the method signature of `findCorrectLot()`.\r
+* Replaced the original `findCorrectLot()` implementation with the stream-based one.\r
+\r
+Note that the changes are already incorporated in the provided code, so no additional snippets or patterns need to be added. ',

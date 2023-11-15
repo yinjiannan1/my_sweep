@@ -32,7 +32,7 @@ OpenAIModel = (
     | Literal["gpt-4"]
     | Literal["gpt-4-0613"]
     | Literal["gpt-3.5-turbo-16k"]
-    | Literal["gpt-3.5-turbo-16k-0613"]
+    | Literal["gpt-3.5-turbo"]
     | Literal["gpt-4-32k"]
     | Literal["gpt-4-32k-0613"]
 )
@@ -64,7 +64,7 @@ class ChatGPT(BaseModel):
     ]
     prev_message_states: list[list[Message]] = []
     model: ChatModel = (
-        "gpt-4-32k-0613" if OPENAI_DO_HAVE_32K_MODEL_ACCESS else "gpt-4-0613"
+        "gpt-3.5-turbo" if OPENAI_DO_HAVE_32K_MODEL_ACCESS else "gpt-3.5-turbo"
     )
     chat_logger: ChatLogger | None
     human_message: HumanMessagePrompt | None = None
@@ -198,7 +198,7 @@ class ChatGPT(BaseModel):
                     f"{purchased_tickets} purchased tickets found in MongoDB, using {model}"
                 )
             else:
-                model = "gpt-3.5-turbo-16k-0613"
+                model = "gpt-3.5-turbo"
 
         count_tokens = Tiktoken().count
         messages_length = sum(
@@ -209,7 +209,7 @@ class ChatGPT(BaseModel):
         )  # this is for the function tokens
         logger.info("file_change_paths" + str(self.file_change_paths))
         messages_raw = "\n".join([(message.content or "") for message in self.messages])
-        logger.info(f"Input to call openai:\n{messages_raw}")
+        # logger.info(f"Input to call openai:\n{messages_raw}")
         if len(self.file_change_paths) > 0:
             self.file_change_paths.remove(self.file_change_paths[0])
         if max_tokens < 0:
@@ -234,7 +234,7 @@ class ChatGPT(BaseModel):
             model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer < 3000
             and not OPENAI_DO_HAVE_32K_MODEL_ACCESS
         ):  # use 16k if it's OOC and no 32k
-            model = "gpt-3.5-turbo-16k-0613"
+            model = "gpt-3.5-turbo"
             max_tokens = (
                 model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer
             )
@@ -242,7 +242,7 @@ class ChatGPT(BaseModel):
             max_tokens = min(max_tokens, 5000)
         # Fix for self hosting where TPM limit is super low for GPT-4
         if OPENAI_USE_3_5_MODEL_ONLY:
-            model = "gpt-3.5-turbo-16k-0613"
+            model = "gpt-3.5-turbo"
             max_tokens = (
                 model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer
             )
@@ -338,7 +338,7 @@ class ChatGPT(BaseModel):
                 model = model or self.model
                 logger.info(f"{tickets_count} tickets found in MongoDB, using {model}")
             else:
-                model = "gpt-3.5-turbo-16k-0613"
+                model = "gpt-3.5-turbo"
 
         count_tokens = Tiktoken().count
         messages_length = sum(
@@ -378,7 +378,7 @@ class ChatGPT(BaseModel):
             max_tokens = min(max_tokens, 5000)
         # Fix for self hosting where TPM limit is super low for GPT-4
         if OPENAI_USE_3_5_MODEL_ONLY:
-            model = "gpt-3.5-turbo-16k-0613"
+            model = "gpt-3.5-turbo"
             max_tokens = (
                 model_to_max_tokens[model] - int(messages_length) - gpt_4_buffer
             )
@@ -452,6 +452,8 @@ class ChatGPT(BaseModel):
     def messages_dicts(self):
         # Remove the key from the message object before sending to OpenAI
         cleaned_messages = [message.to_openai() for message in self.messages]
+        if self.messages and self.messages[-1].key == "pull_request":
+            return cleaned_messages[-2:]
         return cleaned_messages
 
     def undo(self):

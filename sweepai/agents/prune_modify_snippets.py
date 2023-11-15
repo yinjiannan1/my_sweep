@@ -56,6 +56,24 @@ Maximize information density.
 <index>
 n
 </index>
+</snippets_to_edit>
+
+Analyse the snippets and plan, and provide your response in the format:
+
+<snippets_and_plan_analysis file="file_path">
+Describe what should be changed to the snippets from the old_file to complete the request.
+Then, for each snippet in a list, determine whether changes should be made. If so, describe the changes needed.
+Maximize information density.
+</snippets_and_plan_analysis>
+
+<snippets_to_edit>
+<index>
+0
+</index>
+...
+<index>
+n
+</index>
 </snippets_to_edit>"""
 
 

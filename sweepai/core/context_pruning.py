@@ -94,7 +94,7 @@ class ContextPruning(ChatGPT):
             self.model = (
                 "gpt-4-32k"
                 if (self.chat_logger and not self.chat_logger.use_faster_model(kwargs.get("g", None)))
-                else "gpt-3.5-turbo-16k-0613"
+                else "gpt-3.5-turbo"
             )
             response = self.chat(pruning_prompt)
             context_to_prune = ContextToPrune.from_string(response)

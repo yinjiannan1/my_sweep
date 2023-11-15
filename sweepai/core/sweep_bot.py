@@ -352,6 +352,7 @@ class CodeGenBot(ChatGPT):
                     files_to_change_response = self.chat(
                         files_to_change_prompt, message_key="files_to_change"
                     )  # Dedup files to change here
+                    logger.info(f"files_to_change_response is first {files_to_change_response} ")
                     file_change_requests = []
                     for re_match in re.finditer(
                         FileChangeRequest._regex, files_to_change_response, re.DOTALL
@@ -370,7 +371,10 @@ class CodeGenBot(ChatGPT):
                         plan_str = "\n".join(
                             [fcr.instructions_display for fcr in file_change_requests]
                         )
-                        return file_change_requests, plan_str
+                        return file_change_requests, plan_str     
+            logger.info(f"is_python_issue {is_python_issue} ")
+            logger.info(f"python_issue_worked {python_issue_worked} ")
+
             if not is_python_issue or not python_issue_worked:
                 if pr_diffs is not None:
                     self.delete_messages_from_chat("pr_diffs")
@@ -381,6 +385,8 @@ class CodeGenBot(ChatGPT):
                 files_to_change_response = self.chat(
                     files_to_change_prompt, message_key="files_to_change"
                 )  # Dedup files to change here
+                logger.info(f"files_to_change_response is second {files_to_change_response} this is end")
+
             file_change_requests = []
             for re_match in re.finditer(
                 FileChangeRequest._regex, files_to_change_response, re.DOTALL
@@ -394,6 +400,7 @@ class CodeGenBot(ChatGPT):
                     new_file_change_request.id_ = str(uuid.uuid4())
                     file_change_requests.append(new_file_change_request)
 
+            logger.info(f"file_change_requests is second {file_change_requests} this is end")
             if file_change_requests:
                 plan_str = "\n".join(
                     [fcr.instructions_display for fcr in file_change_requests]
@@ -735,6 +742,8 @@ class SweepBot(CodeGenBot, GithubBot):
     ):
         file_change: FileCreation | None = None
         key = f"file_change_created_{file_change_request.filename}"
+        logger.info(f"file_change is, {file_change}")
+        logger.info(f"key is, {key}")
         old_messages = self.messages
         if changed_files:
             file_path_to_contents = OrderedDict()
@@ -761,6 +770,7 @@ class SweepBot(CodeGenBot, GithubBot):
             )
         self.delete_messages_from_chat(key_to_delete="files_to_change")
         blocked_dirs = get_blocked_dirs(self.repo)
+        logger.info(f"blocked_dirs, {blocked_dirs}")
         if file_change_request.relevant_files:
             relevant_files_contents = []
             for file_path in file_change_request.relevant_files:
@@ -790,6 +800,7 @@ class SweepBot(CodeGenBot, GithubBot):
                         key="relevant_files_summary",
                     )
                 )
+        logger.info(f"start chat with")
         create_file_response = self.chat(
             create_file_prompt.format(
                 filename=file_change_request.filename,
@@ -797,6 +808,7 @@ class SweepBot(CodeGenBot, GithubBot):
             ),
             message_key=key,
         )
+        logger.info(f"create_file_response is, {create_file_response}")
         if changed_files:
             self.delete_messages_from_chat(key_to_delete="changed_files_summary")
         # Add file to list of changed_files

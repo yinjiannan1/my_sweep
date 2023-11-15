@@ -251,14 +251,16 @@ def create_config_pr(
             commit_history = []
             if cloned_repo is not None:
                 commit_history = cloned_repo.get_commit_history(
-                    limit=1000, time_limited=False
+                    limit=100, time_limited=False
                 )
             commit_string = "\n".join(commit_history)
+            logger.info(f"commit string is  {commit_string}")
 
             sweep_yaml_bot = SweepYamlBot()
             generated_rules = sweep_yaml_bot.get_sweep_yaml_rules(
                 commit_history=commit_string
             )
+            logger.info(f"generate rule is {generated_rules}")
 
             sweep_bot.repo.create_file(
                 "sweep.yaml",
@@ -269,12 +271,16 @@ def create_config_pr(
                 ),
                 branch=branch_name,
             )
+            logger.info(f"sweep_bot.repo.default_branch is, {sweep_bot.repo.default_branch}")
+            logger.info(f"branch is, {branch_name}")
+
             sweep_bot.repo.create_file(
                 ".github/ISSUE_TEMPLATE/sweep-template.yml",
                 "Create sweep template",
                 SWEEP_TEMPLATE,
                 branch=branch_name,
             )
+            logger.info(f"branch name is, {branch_name}")
         except SystemExit:
             raise SystemExit
         except Exception as e:

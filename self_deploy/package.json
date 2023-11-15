@@ -1,5 +1,5 @@
 {
-  "name": "Sweep (self-deployed)",
+  "name": "sweep-self-deployed",
   "version": "1.0.0",
   "private": true,
   "description": "Self-hosted Sweep, an AI powered-junior developer",

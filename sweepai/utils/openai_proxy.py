@@ -3,7 +3,10 @@ import time
 
 import baserun
 import openai
+import json
 from loguru import logger
+from gradio_client import Client
+
 
 from sweepai.config.server import (
     AZURE_API_KEY,
@@ -36,7 +39,7 @@ class OpenAIProxy:
             engine = None
             if (
                 model == "gpt-3.5-turbo-16k"
-                or model == "gpt-3.5-turbo-16k-0613"
+                or model == "gpt-3.5-turbo"
                 and OPENAI_API_ENGINE_GPT35 is not None
             ):
                 engine = OPENAI_API_ENGINE_GPT35
@@ -54,15 +57,26 @@ class OpenAIProxy:
                 engine = OPENAI_API_ENGINE_GPT4_32K
             if OPENAI_API_TYPE is None or engine is None:
                 openai.api_key = OPENAI_API_KEY
-                openai.api_base = "https://api.openai.com/v1"
+                openai.api_base = "http://8.130.161.29/v1"
                 openai.api_version = None
                 openai.api_type = "open_ai"
                 logger.info(f"Calling {model} on OpenAI.")
+
+                                                # 将messages转换为字符串
+                messages_str = '\n\n'.join([message["content"] for message in messages])                    
+                messages_given = [
+                    {
+                        "content": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n" + messages_str +"\n\n### Response:",
+                        "role": "user"
+                    }
+                ]
+                logger.info(f"log message is {messages_given} on OpenAI.")
+                logger.info(f"original message is {messages_given} on OpenAI.")            
                 response = openai.ChatCompletion.create(
-                    model=model,
+                    model="gpt-3.5-turbo-16k",
                     messages=messages,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
+                    max_tokens=12000,
+                    temperature=0,
                     timeout=OPENAI_TIMEOUT,
                 )
                 return response["choices"][0].message.content
@@ -82,7 +96,7 @@ class OpenAIProxy:
                 openai.api_key = AZURE_API_KEY
                 response = openai.ChatCompletion.create(
                     engine=engine,
-                    model=model,
+                    model="gpt-3.5-turbo-16k",
                     messages=messages,
                     max_tokens=max_tokens,
                     temperature=temperature,
@@ -106,7 +120,7 @@ class OpenAIProxy:
                     openai.api_type = OPENAI_API_TYPE
                     response = openai.ChatCompletion.create(
                         engine=engine,
-                        model=model,
+                        model="gpt-3.5-turbo-16k",
                         messages=messages,
                         max_tokens=max_tokens,
                         temperature=temperature,
@@ -124,15 +138,26 @@ class OpenAIProxy:
             if OPENAI_API_KEY:
                 try:
                     openai.api_key = OPENAI_API_KEY
-                    openai.api_base = "https://api.openai.com/v1"
+                    openai.api_base = "http://8.130.161.29/v1"
                     openai.api_version = None
                     openai.api_type = "open_ai"
                     logger.info(f"Calling {model} with OpenAI.")
+
+                                                    # 将messages转换为字符串
+                    messages_str = '\n\n'.join([message["content"] for message in messages])                    
+                    messages_given = [
+                        {
+                            "content": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n" + messages_str +"\n\n### Response:",
+                            "role": "user"
+                        }
+                    ]
+                    logger.info(f"log message is {messages_given} on OpenAI.")
+                    logger.info(f"original message is {messages_given} on OpenAI.")            
                     response = openai.ChatCompletion.create(
-                        model=model,
+                        model="gpt-3.5-turbo-16k",
                         messages=messages,
-                        max_tokens=max_tokens,
-                        temperature=temperature,
+                        max_tokens=12000,
+                        temperature=0,
                         timeout=OPENAI_TIMEOUT,
                     )
                     return response["choices"][0].message.content
